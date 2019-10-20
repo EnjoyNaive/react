@@ -9,14 +9,14 @@
 
 import ReactSharedInternals from 'shared/ReactSharedInternals';
 
-const {ReactCurrentBatchConfig} = ReactSharedInternals;
+const { ReactCurrentBatchConfig } = ReactSharedInternals;
 
 export type SuspenseConfig = {|
-  timeoutMs: number,
-  busyDelayMs?: number,
-  busyMinDurationMs?: number,
+    timeoutMs: number,
+        busyDelayMs ?: number,
+        busyMinDurationMs ?: number,
 |};
 
 export function requestCurrentSuspenseConfig(): null | SuspenseConfig {
-  return ReactCurrentBatchConfig.suspense;
+    return ReactCurrentBatchConfig.suspense;
 }
