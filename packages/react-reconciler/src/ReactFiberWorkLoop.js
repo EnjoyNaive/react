@@ -476,14 +476,15 @@ function markUpdateTimeFromFiberToRoot(fiber, expirationTime) {
                 alternate.childExpirationTime = expirationTime;
             }
             if (node.return === null && node.tag === HostRoot) {
-                root = node.stateNode;
+                //! HostRoot.stateNode === fiberRoot, 普通的 fiber 其`stateNode`为相对应的 dom 节点
+                root = node.stateNode;  //! root === fiberRoot, fiberRoot 是 ReactRoot._internalRoot
                 break;
             }
             node = node.return;
         }
     }
 
-    if (root !== null) {
+    if (root !== null) { //? root可能是null?
         if (workInProgressRoot === root) {
             // Received an update to a tree that's in the middle of rendering. Mark
             // that's unprocessed work on this root.
