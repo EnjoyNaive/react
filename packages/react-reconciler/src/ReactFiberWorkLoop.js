@@ -372,8 +372,8 @@ export function scheduleUpdateOnFiber(
     fiber: Fiber,
     expirationTime: ExpirationTime,
 ) {
-    checkForNestedUpdates();
-    warnAboutInvalidUpdatesOnClassComponentsInDEV(fiber);
+    checkForNestedUpdates(); //! 为了防止在 `willUpdate` 和  `didUpdate` 里面调用 `setState` 造成的无限循环, 检测限制是50次
+    warnAboutInvalidUpdatesOnClassComponentsInDEV(fiber); //! dev
 
     const root = markUpdateTimeFromFiberToRoot(fiber, expirationTime);
     if (root === null) {
@@ -2494,7 +2494,8 @@ function computeMsUntilSuspenseLoadingDelay(
 }
 
 function checkForNestedUpdates() {
-    if (nestedUpdateCount > NESTED_UPDATE_LIMIT) {
+    //! nestedUpdateCount default = 0
+    if (nestedUpdateCount > NESTED_UPDATE_LIMIT) { //? NESTED_UPDATE_LIMIT= 50
         nestedUpdateCount = 0;
         rootWithNestedUpdates = null;
         invariant(
