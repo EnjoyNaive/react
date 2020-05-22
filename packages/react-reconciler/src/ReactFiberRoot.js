@@ -158,9 +158,11 @@ export function createFiberRoot(
 
   // Cyclic construction. This cheats the type system right now because
   // stateNode is any.
-  const uninitializedFiber = createHostRootFiber(tag);
+  const uninitializedFiber = createHostRootFiber(tag); //! FiberNode
   root.current = uninitializedFiber;
   uninitializedFiber.stateNode = root;
+   //! 这会形成一个循环引用的结构
+  //! FiberRoot.current = HostRoot; HostRoot.stateNode = FiberRoot
 
   return root;
 }

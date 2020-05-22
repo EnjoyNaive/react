@@ -370,33 +370,43 @@ ReactWork.prototype._onCommit = function(): void {
   }
 };
 
+//! 返回值是 FiberRoot
 function createRootImpl(
   container: DOMContainer,
-  tag: RootTag,
+  tag: RootTag, //! 首次渲染时值为 `LegacyRoot = 0`
   options: void | RootOptions,
 ) {
   // Tag is either LegacyRoot or Concurrent Root
   const hydrate = options != null && options.hydrate === true;
   const hydrationCallbacks =
     (options != null && options.hydrationOptions) || null;
+
+    //! `createContainer` from  file://.../react-reconciler/ReactFiberReconciler:299
+    //! root: FiberRootNode as FiberRoot
+    //! root.current = HostRoot: FiberNode
+    //! HostRoot.stateNode = root: FiberRootNode
+    //! root.current.stateNode === root
   const root = createContainer(container, tag, hydrate, hydrationCallbacks);
+
+  //! container['__reactContainer$' + randomKey] = root.current
+  //! #root上有一个以 `__reactContainer$` 开头后加随机字符的属性连接到 HostRoot, HostRoot可以认为是<App />的直接父节点
   markContainerAsRoot(root.current, container);
   if (hydrate && tag !== LegacyRoot) {
     const doc =
       container.nodeType === DOCUMENT_NODE
         ? container
         : container.ownerDocument;
-    eagerlyTrapReplayableEvents(doc);
+    eagerlyTrapReplayableEvents(doc); //! 事件监听入口
   }
   return root;
 }
 
 function ReactSyncRoot(
-  container: DOMContainer,
-  tag: RootTag,
-  options: void | RootOptions,
+  container: DOMContainer, //! #root
+  tag: RootTag, //! 首次渲染时值为 `LegacyRoot = 0`
+  options: void | RootOptions, //! { hydrate: true }
 ) {
-  this._internalRoot = createRootImpl(container, tag, options);
+  this._internalRoot = createRootImpl(container, tag, options); //! FiberRootNode as FiberRoot
 }
 
 function ReactRoot(container: DOMContainer, options: void | RootOptions) {
@@ -496,12 +506,13 @@ function getReactRootElementInContainer(container: any) {
   }
 }
 
+//! 用来验证#root是否具备hydrate的条件
 function shouldHydrateDueToLegacyHeuristic(container) {
   const rootElement = getReactRootElementInContainer(container);
   return !!(
     rootElement &&
-    rootElement.nodeType === ELEMENT_NODE &&
-    rootElement.hasAttribute(ROOT_ATTRIBUTE_NAME)
+    rootElement.nodeType === ELEMENT_NODE &&  //! 这儿要求#root是一个 elementNode `ELEMENT_NODE = 1`
+    rootElement.hasAttribute(ROOT_ATTRIBUTE_NAME) //! ROOT_ATTRIBUTE_NAME = `data-reactroot` 服务端渲染时会在 #root元素上添加这个属性
   );
 }
 
@@ -514,6 +525,7 @@ setBatchingImplementation(
 
 let warnedAboutHydrateAPI = false;
 
+//! 首次挂载时调用过, 用于创建 #root._reactRootContainer 的值
 function legacyCreateRootFromDOMContainer(
   container: DOMContainer,
   forceHydrate: boolean,
@@ -521,9 +533,11 @@ function legacyCreateRootFromDOMContainer(
   const shouldHydrate =
     forceHydrate || shouldHydrateDueToLegacyHeuristic(container);
   // First clear any existing content.
+  //! 首次渲染时如果不需要调和，则会移除所有子节点
   if (!shouldHydrate) {
     let warned = false;
     let rootSibling;
+    //! 为什么不一次性直接滞空 #root， 而要遍历所有子节点，然后一个一个的删？
     while ((rootSibling = container.lastChild)) {
       if (__DEV__) {
         if (
@@ -556,9 +570,10 @@ function legacyCreateRootFromDOMContainer(
   }
 
   // Legacy roots are not batched.
+  //! { _internalRoot: FiberRoot}
   return new ReactSyncRoot(
     container,
-    LegacyRoot,
+    LegacyRoot, //! LegacyRoot = 0 from file://.../share/ReactRootTags
     shouldHydrate
       ? {
           hydrate: true,
@@ -567,11 +582,12 @@ function legacyCreateRootFromDOMContainer(
   );
 }
 
+//! render 函数直接调用的函数
 function legacyRenderSubtreeIntoContainer(
-  parentComponent: ?React$Component<any, any>,
-  children: ReactNodeList,
-  container: DOMContainer,
-  forceHydrate: boolean,
+  parentComponent: ?React$Component<any, any>, //! null
+  children: ReactNodeList, //! <App />
+  container: DOMContainer, //! #root
+  forceHydrate: boolean, //! false 虽然 `forceHydrate` 为 false，但react还是会检查是否符合hydrate的条件
   callback: ?Function,
 ) {
   if (__DEV__) {
@@ -585,20 +601,36 @@ function legacyRenderSubtreeIntoContainer(
   let fiberRoot;
   if (!root) {
     // Initial mount
+    /**
+     *! 可以预见挂载点元素的dom对象 (#root) 总包含一个 `_reactRootContainer` 属性
+     *! 它的值是 `ReactRoot` 类型是 ReactSyncRoot{ _internalRoot: FiberRoot{ current: HostRoot } }
+     *! HostRoot 是 <App /> 的父节点
+     *! #root.      _reactRootContainer.      _internalRoot.             current      .child === <App />
+     *! (container  |     ReactRoot           | FiberRoot                | HostRoot)
+     *!                                ^------------------------------------------.stateNode
+     *!   ^----------------------------------------------.containerInfo
+     *! #root['__reactContainer$' + randomKey] -----------------------------^
+     */
     root = container._reactRootContainer = legacyCreateRootFromDOMContainer(
       container,
       forceHydrate,
     );
+
     fiberRoot = root._internalRoot;
     if (typeof callback === 'function') {
       const originalCallback = callback;
       callback = function() {
+        //! getPublicRootInstance file://.../react-reconciler/src/ReactFiberReconciler:355
         const instance = getPublicRootInstance(fiberRoot);
-        originalCallback.call(instance);
+        originalCallback.call(instance); //! ReactDom.render 函数的call被重新包装， 调用时传入的是 FiberRoot.current.child.stateNode
       };
     }
-    // Initial mount should not be batched.
+    // Initial mount should not be batched. (初始装载不应批处理)
+    //! unbatchedUpdates file://.../react-reconciler/src/ReactFiberWorkLoop:1235
+    //! 可以认为直接调用了回调
     unbatchedUpdates(() => {
+
+      //! updateContainer file://.../react-reconciler/src/ReactFiberReconciler:308
       updateContainer(children, fiberRoot, parentComponent, callback);
     });
   } else {
@@ -688,9 +720,10 @@ const ReactDOM: Object = {
     );
   },
 
+  //! ReactDom.render 函数入口位置
   render(
-    element: React$Element<any>,
-    container: DOMContainer,
+    element: React$Element<any>, //! <App />
+    container: DOMContainer, //! #root
     callback: ?Function,
   ) {
     invariant(

@@ -297,8 +297,8 @@ function findHostInstanceWithWarning(
 }
 
 export function createContainer(
-  containerInfo: Container,
-  tag: RootTag,
+  containerInfo: Container, //!#root
+  tag: RootTag, //! 首次渲染时为 0
   hydrate: boolean,
   hydrationCallbacks: null | SuspenseHydrationCallbacks,
 ): OpaqueRoot {

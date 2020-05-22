@@ -1,0 +1,17 @@
+{
+  "javascript.format.enable": false,
+  "typescript.format.enable": false,
+  "javascript.validate.enable": false,
+  "flow.enabled": true,
+  "html.format.enable": false,
+  "editor.formatOnType": false,
+  "editor.formatOnSave": false,
+  "json.format.enable": false,
+  "eslint.format.enable": true,
+  "vetur.format.defaultFormatter.js": "none",
+  "editor.defaultFormatter": null,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": false,
+    "source.fixAll": false
+  }
+}
