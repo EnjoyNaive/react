@@ -352,10 +352,10 @@ function FiberNode(
 // 5) It should be easy to port this to a C struct and keep a C implementation
 //    compatible.
 const createFiber = function(
-  tag: WorkTag,
-  pendingProps: mixed,
-  key: null | string,
-  mode: TypeOfMode,
+  tag: WorkTag, //! 3
+  pendingProps: mixed, // null
+  key: null | string, // null
+  mode: TypeOfMode, //! 0
 ): Fiber {
   // $FlowFixMe: the shapes are exact here but Flow doesn't like constructors
   return new FiberNode(tag, pendingProps, key, mode);
@@ -572,12 +572,14 @@ export function resetWorkInProgress(
 
 export function createHostRootFiber(tag: RootTag): Fiber {
   let mode;
+  //! ConcurrentRoot == 2 , file://.../shared/ReactRootTags:14
   if (tag === ConcurrentRoot) {
     mode = ConcurrentMode | BatchedMode | StrictMode;
+  //! BatchedRoot == 1 , file://.../shared/ReactRootTags:13
   } else if (tag === BatchedRoot) {
     mode = BatchedMode | StrictMode;
   } else {
-    mode = NoMode;
+    mode = NoMode; // 0
   }
 
   if (enableProfilerTimer && isDevToolsPresent) {
@@ -586,7 +588,7 @@ export function createHostRootFiber(tag: RootTag): Fiber {
     // Without some nodes in the tree having empty base times.
     mode |= ProfileMode;
   }
-
+  //! HostRoot === 3, file://.../shared/ReactWorkTags:37
   return createFiber(HostRoot, null, null, mode);
 }
 

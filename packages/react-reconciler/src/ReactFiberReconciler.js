@@ -132,9 +132,9 @@ function getContextForSubtree(
 }
 
 function scheduleRootUpdate(
-  current: Fiber,
-  element: ReactNodeList,
-  expirationTime: ExpirationTime,
+  current: Fiber, //! HostRoot
+  element: ReactNodeList, //! <App />
+  expirationTime: ExpirationTime, //! Sync
   suspenseConfig: null | SuspenseConfig,
   callback: ?Function,
 ) {
@@ -172,22 +172,22 @@ function scheduleRootUpdate(
     update.callback = callback;
   }
 
-  enqueueUpdate(current, update);
+  enqueueUpdate(current, update); // current.updateQueue.firstUpdate = update
   scheduleWork(current, expirationTime);
 
   return expirationTime;
 }
 
 export function updateContainerAtExpirationTime(
-  element: ReactNodeList,
-  container: OpaqueRoot,
-  parentComponent: ?React$Component<any, any>,
-  expirationTime: ExpirationTime,
+  element: ReactNodeList, //! <App />
+  container: OpaqueRoot, //! fiberRoot
+  parentComponent: ?React$Component<any, any>, // null
+  expirationTime: ExpirationTime, //Sync
   suspenseConfig: null | SuspenseConfig,
   callback: ?Function,
 ) {
   // TODO: If this is a nested container, this won't be the root.
-  const current = container.current;
+  const current = container.current; //! HostRoot
 
   if (__DEV__) {
     if (ReactFiberInstrumentation.debugTool) {
@@ -306,12 +306,12 @@ export function createContainer(
 }
 
 export function updateContainer(
-  element: ReactNodeList,
-  container: OpaqueRoot,
+  element: ReactNodeList, //! <App />
+  container: OpaqueRoot, //! fiberRoot
   parentComponent: ?React$Component<any, any>,
   callback: ?Function,
 ): ExpirationTime {
-  const current = container.current;
+  const current = container.current; //! HostRoot
   const currentTime = requestCurrentTime();
   if (__DEV__) {
     // $FlowExpectedError - jest isn't a global, and isn't recognized outside of tests

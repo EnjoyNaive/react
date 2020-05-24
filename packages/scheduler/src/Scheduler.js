@@ -60,7 +60,7 @@ var LOW_PRIORITY_TIMEOUT = 10000;
 var IDLE_PRIORITY = maxSigned31BitInt;
 
 // Tasks are stored on a min heap
-var taskQueue = [];
+var taskQueue = []; //! Tasks are stored on a min heap
 var timerQueue = [];
 
 // Incrementing id counter. Used to maintain insertion order.
@@ -119,7 +119,7 @@ function handleTimeout(currentTime) {
   }
 }
 
-function flushWork(hasTimeRemaining, initialTime) {
+function flushWork(hasTimeRemaining /**true */, initialTime /**currentTime */) {
   if (enableProfiling) {
     markSchedulerUnsuspended(initialTime);
   }
@@ -161,7 +161,7 @@ function flushWork(hasTimeRemaining, initialTime) {
   }
 }
 
-function workLoop(hasTimeRemaining, initialTime) {
+function workLoop(hasTimeRemaining /**true */, initialTime/**currentTime */) {
   let currentTime = initialTime;
   advanceTimers(currentTime);
   currentTask = peek(taskQueue);
@@ -180,7 +180,7 @@ function workLoop(hasTimeRemaining, initialTime) {
     if (callback !== null) {
       currentTask.callback = null;
       currentPriorityLevel = currentTask.priorityLevel;
-      const didUserCallbackTimeout = currentTask.expirationTime <= currentTime;
+      const didUserCallbackTimeout = currentTask.expirationTime <= currentTime; //!expirationTime = startTime -timeout
       markTaskRun(currentTask, currentTime);
       const continuationCallback = callback(didUserCallbackTimeout);
       currentTime = getCurrentTime();
@@ -344,7 +344,7 @@ function unstable_scheduleCallback(priorityLevel, callback, options) {
     }
   } else {
     newTask.sortIndex = expirationTime;
-    push(taskQueue, newTask);
+    push(taskQueue, newTask); //! taskQueue是一个最小堆, 参考值是 sortIndex和id
     if (enableProfiling) {
       markTaskStart(newTask, currentTime);
       newTask.isQueued = true;
@@ -353,7 +353,7 @@ function unstable_scheduleCallback(priorityLevel, callback, options) {
     // wait until the next time we yield.
     if (!isHostCallbackScheduled && !isPerformingWork) {
       isHostCallbackScheduled = true;
-      requestHostCallback(flushWork);
+      requestHostCallback(flushWork); //! flushWork 将被异步调用 RAF, 在每一帧会调整帧率
     }
   }
 

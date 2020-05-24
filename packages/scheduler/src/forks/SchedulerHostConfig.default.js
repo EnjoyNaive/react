@@ -292,7 +292,7 @@ if (
       onAnimationFrame(nextRAFTime);
     });
 
-    // requestAnimationFrame is throttled when the tab is backgrounded. We
+    // requestAnimationFrame is throttled(节流) when the tab is backgrounded. We
     // don't want to stop working entirely. So we'll fallback to a timeout loop.
     // TODO: Need a better heuristic for backgrounded work.
     const onTimeout = () => {
@@ -302,6 +302,7 @@ if (
     };
     rAFTimeoutID = setTimeout(onTimeout, frameLength * 3);
 
+    //! 每一次进入回调时会检查帧率
     if (
       prevRAFTime !== -1 &&
       // Make sure this rAF time is different from the previous one. This check
@@ -350,6 +351,7 @@ if (
       if (!isRAFLoopRunning) {
         // Start a rAF loop.
         isRAFLoopRunning = true;
+        //! rAFTime在兼容requestAnimationFrame的环境下等同于performance.now(), 表示requestAnimationFrame的回调开始执行的时间
         requestAnimationFrame(rAFTime => {
           onAnimationFrame(rAFTime);
         });

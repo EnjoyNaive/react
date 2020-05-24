@@ -287,12 +287,14 @@ let spawnedWorkDuringRender: null | Array<ExpirationTime> = null;
 // In other words, because expiration times determine how updates are batched,
 // we want all updates of like priority that occur within the same event to
 // receive the same expiration time. Otherwise we get tearing.
-let currentEventTime: ExpirationTime = NoWork;
+let currentEventTime: ExpirationTime = NoWork; //! 0
 
 export function requestCurrentTime() {
   if ((executionContext & (RenderContext | CommitContext)) !== NoContext) {
     // We're inside React, so it's fine to read the actual time.
-    return msToExpirationTime(now());
+    //! now 在支持 performance 的系统中 返回performance.now()，可以认为是一个从页面开始加载到这个函数调用所经过的时间（ms）
+    //! 不支持的系统中将会fallback到 Date.now()
+    return msToExpirationTime(now()); //! 时间越久值越小
   }
   // We're not inside React, so we may be in the middle of a browser event.
   if (currentEventTime !== NoWork) {
@@ -311,7 +313,7 @@ export function computeExpirationForFiber(
 ): ExpirationTime {
   const mode = fiber.mode;
   if ((mode & BatchedMode) === NoMode) {
-    return Sync;
+    return Sync; //! 第一次加载时
   }
 
   const priorityLevel = getCurrentPriorityLevel();
@@ -382,14 +384,15 @@ export function computeUniqueAsyncExpiration(): ExpirationTime {
   return result;
 }
 
+//! scheduleUpdate
 export function scheduleUpdateOnFiber(
-  fiber: Fiber,
-  expirationTime: ExpirationTime,
+  fiber: Fiber, //! HostRoot
+  expirationTime: ExpirationTime, //! Sync
 ) {
   checkForNestedUpdates();
   warnAboutInvalidUpdatesOnClassComponentsInDEV(fiber);
 
-  const root = markUpdateTimeFromFiberToRoot(fiber, expirationTime);
+  const root = markUpdateTimeFromFiberToRoot(fiber, expirationTime); //! fiberRoot
   if (root === null) {
     warnAboutUpdateOnUnmountedFiberInDEV(fiber);
     return;
@@ -400,7 +403,7 @@ export function scheduleUpdateOnFiber(
 
   // TODO: computeExpirationForFiber also reads the priority. Pass the
   // priority as an argument to that function and this one.
-  const priorityLevel = getCurrentPriorityLevel();
+  const priorityLevel = getCurrentPriorityLevel(); //! NormalPriority === 3
 
   if (expirationTime === Sync) {
     if (
@@ -417,7 +420,7 @@ export function scheduleUpdateOnFiber(
       // should be deferred until the end of the batch.
       performSyncWorkOnRoot(root);
     } else {
-      ensureRootIsScheduled(root);
+      ensureRootIsScheduled(root); //! 内部设有异步回调
       schedulePendingInteractions(root, expirationTime);
       if (executionContext === NoContext) {
         // Flush the synchronous work now, unless we're already working or inside
@@ -471,7 +474,7 @@ function markUpdateTimeFromFiberToRoot(fiber, expirationTime) {
   let node = fiber.return;
   let root = null;
   if (node === null && fiber.tag === HostRoot) {
-    root = fiber.stateNode;
+    root = fiber/**HostRoot */.stateNode; //!fiberRoot
   } else {
     while (node !== null) {
       alternate = node.alternate;
@@ -572,7 +575,7 @@ function ensureRootIsScheduled(root: FiberRoot) {
     return;
   }
 
-  const expirationTime = getNextRootExpirationTimeToWorkOn(root);
+  const expirationTime = getNextRootExpirationTimeToWorkOn(root); //! Sync
   const existingCallbackNode = root.callbackNode;
   if (expirationTime === NoWork) {
     // There's nothing to work on.
@@ -587,7 +590,7 @@ function ensureRootIsScheduled(root: FiberRoot) {
   // TODO: If this is an update, we already read the current time. Pass the
   // time as an argument.
   const currentTime = requestCurrentTime();
-  const priorityLevel = inferPriorityFromExpirationTime(
+  const priorityLevel = inferPriorityFromExpirationTime(  //! ImmediatePriority 99
     currentTime,
     expirationTime,
   );
@@ -618,7 +621,7 @@ function ensureRootIsScheduled(root: FiberRoot) {
   let callbackNode;
   if (expirationTime === Sync) {
     // Sync React callbacks are scheduled on a special internal queue
-    callbackNode = scheduleSyncCallback(performSyncWorkOnRoot.bind(null, root));
+    callbackNode = scheduleSyncCallback(performSyncWorkOnRoot.bind(null, root)); //! 异步调用performSyncWorkOnRoot
   } else if (disableSchedulerTimeoutBasedOnReactExpirationTime) {
     callbackNode = scheduleCallback(
       priorityLevel,
@@ -991,7 +994,7 @@ function finishConcurrentRender(
 
 // This is the entry point for synchronous tasks that don't go
 // through Scheduler
-function performSyncWorkOnRoot(root) {
+function performSyncWorkOnRoot(root /** fiberRoot */) { //! 首次调度函数将进入performSyncWorkOnRoot
   // Check if there's expired work on this root. Otherwise, render at Sync.
   const lastExpiredTime = root.lastExpiredTime;
   const expirationTime = lastExpiredTime !== NoWork ? lastExpiredTime : Sync;
@@ -2595,11 +2598,11 @@ function stopInterruptedWorkLoopTimer() {
 }
 
 function checkForInterruption(
-  fiberThatReceivedUpdate: Fiber,
+  fiberThatReceivedUpdate: Fiber, //! HostRoot
   updateExpirationTime: ExpirationTime,
 ) {
   if (
-    enableUserTimingAPI &&
+    enableUserTimingAPI && //! enableUserTimingAPI == __DEV__,  file://.../shared/ReactFeatureFlags:10
     workInProgressRoot !== null &&
     updateExpirationTime > renderExpirationTime
   ) {
@@ -3040,7 +3043,7 @@ function scheduleInteractions(root, expirationTime, interactions) {
   }
 }
 
-function schedulePendingInteractions(root, expirationTime) {
+function schedulePendingInteractions(root /**fiberRoot */, expirationTime /**Sync */) {
   // This is called when work is scheduled on a root.
   // It associates the current interactions with the newly-scheduled expiration.
   // They will be restored when that expiration is later committed.

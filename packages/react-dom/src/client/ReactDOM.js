@@ -391,7 +391,7 @@ function createRootImpl(
   //! container['__reactContainer$' + randomKey] = root.current
   //! #root上有一个以 `__reactContainer$` 开头后加随机字符的属性连接到 HostRoot, HostRoot可以认为是<App />的直接父节点
   markContainerAsRoot(root.current, container);
-  if (hydrate && tag !== LegacyRoot) {
+  if (hydrate && tag !== LegacyRoot) { //! LegacyRoot ===0, file://.../shared/ReactRootTags
     const doc =
       container.nodeType === DOCUMENT_NODE
         ? container
@@ -626,7 +626,7 @@ function legacyRenderSubtreeIntoContainer(
       };
     }
     // Initial mount should not be batched. (初始装载不应批处理)
-    //! unbatchedUpdates file://.../react-reconciler/src/ReactFiberWorkLoop:1235
+    //! unbatchedUpdates file://.../react-reconciler/src/ReactFiberWorkLoop:1238
     //! 可以认为直接调用了回调
     unbatchedUpdates(() => {
 

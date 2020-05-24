@@ -202,14 +202,14 @@ function cloneUpdateQueue<State>(
 }
 
 export function createUpdate(
-  expirationTime: ExpirationTime,
+  expirationTime: ExpirationTime, //! Sync
   suspenseConfig: null | SuspenseConfig,
 ): Update<*> {
   let update: Update<*> = {
     expirationTime,
     suspenseConfig,
 
-    tag: UpdateState,
+    tag: UpdateState, // 0
     payload: null,
     callback: null,
 
@@ -236,7 +236,7 @@ function appendUpdateToQueue<State>(
   }
 }
 
-export function enqueueUpdate<State>(fiber: Fiber, update: Update<State>) {
+export function enqueueUpdate<State>(fiber: Fiber,/**HostRoot */ update: Update<State>) {
   // Update queues are created lazily.
   const alternate = fiber.alternate;
   let queue1;

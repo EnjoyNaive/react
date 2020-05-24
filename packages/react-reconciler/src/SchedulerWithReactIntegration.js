@@ -141,7 +141,7 @@ export function scheduleSyncCallback(callback: SchedulerCallback) {
     syncQueue = [callback];
     // Flush the queue in the next tick, at the earliest.
     immediateQueueCallbackNode = Scheduler_scheduleCallback(
-      Scheduler_ImmediatePriority,
+      Scheduler_ImmediatePriority, //! 1
       flushSyncCallbackQueueImpl,
     );
   } else {
@@ -175,7 +175,7 @@ function flushSyncCallbackQueueImpl() {
     try {
       const isSync = true;
       const queue = syncQueue;
-      runWithPriority(ImmediatePriority, () => {
+      runWithPriority(ImmediatePriority, /**fn*/ () => { //! 可以认为直接调用了回调 fn
         for (; i < queue.length; i++) {
           let callback = queue[i];
           do {

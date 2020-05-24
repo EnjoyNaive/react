@@ -127,8 +127,8 @@ function FiberRootNode(containerInfo, tag, hydrate) {
   this.hydrate = hydrate;
   this.firstBatch = null;
   this.callbackNode = null;
-  this.callbackPriority = NoPriority;
-  this.firstPendingTime = NoWork;
+  this.callbackPriority = NoPriority; // 90
+  this.firstPendingTime = NoWork; // 0
   this.firstSuspendedTime = NoWork;
   this.lastSuspendedTime = NoWork;
   this.nextKnownPendingLevel = NoWork;
@@ -158,7 +158,7 @@ export function createFiberRoot(
 
   // Cyclic construction. This cheats the type system right now because
   // stateNode is any.
-  const uninitializedFiber = createHostRootFiber(tag); //! FiberNode
+  const uninitializedFiber = createHostRootFiber(tag); //! FiberNode === HostRoot
   root.current = uninitializedFiber;
   uninitializedFiber.stateNode = root;
    //! 这会形成一个循环引用的结构
@@ -203,8 +203,8 @@ export function markRootSuspendedAtTime(
 }
 
 export function markRootUpdatedAtTime(
-  root: FiberRoot,
-  expirationTime: ExpirationTime,
+  root: FiberRoot, //! fiberRoot
+  expirationTime: ExpirationTime, //! Sync
 ): void {
   // Update the range of pending times
   const firstPendingTime = root.firstPendingTime;
