@@ -1,5 +1,5 @@
 ## 数据结构
-![alt struct](images/struct.jpg)
+![alt struct](https://github.com/uploy/react/blob/annotation/16.10.0/images/struct.jpg?raw=true)
 
 ## 调用栈
 ```js
@@ -46,10 +46,10 @@ ReactDom.render()@ReactDOM.js:724
                   -> Scheduler_scheduleCallback:unstable_scheduleCallback()@Scheduler.js:295
                     -> getCurrentTime()@SchedulerHostConfig.js:27/55/111/114
                     -> requestHostCallback(flushWork)@SchedulerHostConfig.js:58/343
-                    -> requestAnimationFrame()
+                    -> requestAnimationFrame(onAnimationFrame)
 <---@ return
-@requestAnimationFrame:49 onAnimationFrame()@SchedulerHostConfig.js:272
-  -> setTimeout()
-@setTimeout:52 performWorkUntilDeadline()@SchedulerHostConfig.js:208
+@requestAnimationFrame onAnimationFrame()@SchedulerHostConfig.js:272
+  -> setTimeout(performWorkUntilDeadline)
+@setTimeout performWorkUntilDeadline()@SchedulerHostConfig.js:208
   -> scheduledHostCallback:flushWork()@Scheduler.js:122
     -> workLoop()@Scheduler.js:164
