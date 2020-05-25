@@ -384,7 +384,7 @@ export function computeUniqueAsyncExpiration(): ExpirationTime {
   return result;
 }
 
-//! scheduleUpdate
+//! scheduleWork
 export function scheduleUpdateOnFiber(
   fiber: Fiber, //! HostRoot
   expirationTime: ExpirationTime, //! Sync
