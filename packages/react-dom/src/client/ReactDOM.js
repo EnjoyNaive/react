@@ -8,40 +8,36 @@
  */
 
 import type {ReactNodeList} from 'shared/ReactTypes';
-import type {RootTag} from 'shared/ReactRootTags';
-// TODO: This type is shared between the reconciler and ReactDOM, but will
-// eventually be lifted out to the renderer.
-import type {
-  FiberRoot,
-  Batch as FiberRootBatch,
-} from 'react-reconciler/src/ReactFiberRoot';
+import type {Container} from './ReactDOMHostConfig';
 
 import '../shared/checkReact';
 import './ReactDOMClientInjection';
+import {
+  findDOMNode,
+  render,
+  hydrate,
+  unstable_renderSubtreeIntoContainer,
+  unmountComponentAtNode,
+} from './ReactDOMLegacy';
+import {createRoot, createBlockingRoot, isValidContainer} from './ReactDOMRoot';
+import {useEvent} from './ReactDOMUseEvent';
 
 import {
-  computeUniqueAsyncExpiration,
-  findHostInstanceWithNoPortals,
-  updateContainerAtExpirationTime,
-  flushRoot,
-  createContainer,
-  updateContainer,
   batchedEventUpdates,
   batchedUpdates,
-  unbatchedUpdates,
   discreteUpdates,
   flushDiscreteUpdates,
   flushSync,
   flushControlled,
   injectIntoDevTools,
-  getPublicRootInstance,
-  findHostInstance,
-  findHostInstanceWithWarning,
   flushPassiveEffects,
   IsThisRendererActing,
   attemptSynchronousHydration,
-} from 'react-reconciler/inline.dom';
-import {createPortal as createPortalImpl} from 'shared/ReactPortal';
+  attemptUserBlockingHydration,
+  attemptContinuousHydration,
+  attemptHydrationAtCurrentPriority,
+} from 'react-reconciler/src/ReactFiberReconciler';
+import {createPortal as createPortalImpl} from 'react-reconciler/src/ReactPortal';
 import {canUseDOM} from 'shared/ExecutionEnvironment';
 import {setBatchingImplementation} from 'legacy-events/ReactGenericBatching';
 import {
@@ -49,49 +45,38 @@ import {
   enqueueStateRestore,
   restoreStateIfNeeded,
 } from 'legacy-events/ReactControlledComponent';
-import {injection as EventPluginHubInjection} from 'legacy-events/EventPluginHub';
 import {runEventsInBatch} from 'legacy-events/EventBatching';
-import {eventNameDispatchConfigs} from 'legacy-events/EventPluginRegistry';
 import {
-  accumulateTwoPhaseDispatches,
-  accumulateDirectDispatches,
-} from 'legacy-events/EventPropagators';
-import {LegacyRoot, ConcurrentRoot, BatchedRoot} from 'shared/ReactRootTags';
-import {has as hasInstance} from 'shared/ReactInstanceMap';
+  eventNameDispatchConfigs,
+  injectEventPluginsByName,
+} from 'legacy-events/EventPluginRegistry';
 import ReactVersion from 'shared/ReactVersion';
-import ReactSharedInternals from 'shared/ReactSharedInternals';
-import getComponentName from 'shared/getComponentName';
 import invariant from 'shared/invariant';
-import lowPriorityWarningWithoutStack from 'shared/lowPriorityWarningWithoutStack';
-import warningWithoutStack from 'shared/warningWithoutStack';
-import {enableStableConcurrentModeAPIs} from 'shared/ReactFeatureFlags';
+import {warnUnstableRenderSubtreeIntoContainer} from 'shared/ReactFeatureFlags';
 
 import {
   getInstanceFromNode,
   getNodeFromInstance,
   getFiberCurrentPropsFromNode,
   getClosestInstanceFromNode,
-  markContainerAsRoot,
 } from './ReactDOMComponentTree';
 import {restoreControlledState} from './ReactDOMComponent';
 import {dispatchEvent} from '../events/ReactDOMEventListener';
-import {setAttemptSynchronousHydration} from '../events/ReactDOMEventReplaying';
-import {eagerlyTrapReplayableEvents} from '../events/ReactDOMEventReplaying';
 import {
-  ELEMENT_NODE,
-  COMMENT_NODE,
-  DOCUMENT_NODE,
-  DOCUMENT_FRAGMENT_NODE,
-} from '../shared/HTMLNodeType';
-import {ROOT_ATTRIBUTE_NAME} from '../shared/DOMProperty';
+  setAttemptSynchronousHydration,
+  setAttemptUserBlockingHydration,
+  setAttemptContinuousHydration,
+  setAttemptHydrationAtCurrentPriority,
+  queueExplicitHydrationTarget,
+} from '../events/ReactDOMEventReplaying';
 
 setAttemptSynchronousHydration(attemptSynchronousHydration);
+setAttemptUserBlockingHydration(attemptUserBlockingHydration);
+setAttemptContinuousHydration(attemptContinuousHydration);
+setAttemptHydrationAtCurrentPriority(attemptHydrationAtCurrentPriority);
 
-const ReactCurrentOwner = ReactSharedInternals.ReactCurrentOwner;
-
-let topLevelUpdateWarnings;
-let warnOnInvalidCallback;
 let didWarnAboutUnstableCreatePortal = false;
+let didWarnAboutUnstableRenderSubtreeIntoContainer = false;
 
 if (__DEV__) {
   if (
@@ -105,65 +90,16 @@ if (__DEV__) {
     typeof Set.prototype.clear !== 'function' ||
     typeof Set.prototype.forEach !== 'function'
   ) {
-    warningWithoutStack(
-      false,
+    console.error(
       'React depends on Map and Set built-in types. Make sure that you load a ' +
         'polyfill in older browsers. https://fb.me/react-polyfills',
     );
   }
-
-  topLevelUpdateWarnings = (container: DOMContainer) => {
-    if (container._reactRootContainer && container.nodeType !== COMMENT_NODE) {
-      const hostInstance = findHostInstanceWithNoPortals(
-        container._reactRootContainer._internalRoot.current,
-      );
-      if (hostInstance) {
-        warningWithoutStack(
-          hostInstance.parentNode === container,
-          'render(...): It looks like the React-rendered content of this ' +
-            'container was removed without using React. This is not ' +
-            'supported and will cause errors. Instead, call ' +
-            'ReactDOM.unmountComponentAtNode to empty a container.',
-        );
-      }
-    }
-
-    const isRootRenderedBySomeReact = !!container._reactRootContainer;
-    const rootEl = getReactRootElementInContainer(container);
-    const hasNonRootReactChild = !!(rootEl && getInstanceFromNode(rootEl));
-
-    warningWithoutStack(
-      !hasNonRootReactChild || isRootRenderedBySomeReact,
-      'render(...): Replacing React-rendered children with a new root ' +
-        'component. If you intended to update the children of this node, ' +
-        'you should instead have the existing children update their state ' +
-        'and render the new components instead of calling ReactDOM.render.',
-    );
-
-    warningWithoutStack(
-      container.nodeType !== ELEMENT_NODE ||
-        !((container: any): Element).tagName ||
-        ((container: any): Element).tagName.toUpperCase() !== 'BODY',
-      'render(): Rendering components directly into document.body is ' +
-        'discouraged, since its children are often manipulated by third-party ' +
-        'scripts and browser extensions. This may lead to subtle ' +
-        'reconciliation issues. Try rendering into a container element created ' +
-        'for your app.',
-    );
-  };
-
-  warnOnInvalidCallback = function(callback: mixed, callerName: string) {
-    warningWithoutStack(
-      callback === null || typeof callback === 'function',
-      '%s(...): Expected the last optional `callback` argument to be a ' +
-        'function. Instead received: %s.',
-      callerName,
-      callback,
-    );
-  };
 }
 
 setRestoreImplementation(restoreControlledState);
+<<<<<<< HEAD
+=======
 
 export type DOMContainer =
   | (Element & {
@@ -391,7 +327,7 @@ function createRootImpl(
   //! container['__reactContainer$' + randomKey] = root.current
   //! #root上有一个以 `__reactContainer$` 开头后加随机字符的属性连接到 HostRoot, HostRoot可以认为是<App />的直接父节点
   markContainerAsRoot(root.current, container);
-  if (hydrate && tag !== LegacyRoot) { //! LegacyRoot ===0, file://.../shared/ReactRootTags
+  if (hydrate && tag !== LegacyRoot) {
     const doc =
       container.nodeType === DOCUMENT_NODE
         ? container
@@ -516,6 +452,7 @@ function shouldHydrateDueToLegacyHeuristic(container) {
   );
 }
 
+>>>>>>> view ReactDom to 633
 setBatchingImplementation(
   batchedUpdates,
   discreteUpdates,
@@ -523,6 +460,8 @@ setBatchingImplementation(
   batchedEventUpdates,
 );
 
+<<<<<<< HEAD
+=======
 let warnedAboutHydrateAPI = false;
 
 //! 首次挂载时调用过, 用于创建 #root._reactRootContainer 的值
@@ -626,7 +565,7 @@ function legacyRenderSubtreeIntoContainer(
       };
     }
     // Initial mount should not be batched. (初始装载不应批处理)
-    //! unbatchedUpdates file://.../react-reconciler/src/ReactFiberWorkLoop:1238
+    //! unbatchedUpdates file://.../react-reconciler/src/ReactFiberWorkLoop:1235
     //! 可以认为直接调用了回调
     unbatchedUpdates(() => {
 
@@ -648,19 +587,28 @@ function legacyRenderSubtreeIntoContainer(
   return getPublicRootInstance(fiberRoot);
 }
 
+>>>>>>> view ReactDom to 633
 function createPortal(
   children: ReactNodeList,
-  container: DOMContainer,
+  container: Container,
   key: ?string = null,
-) {
+): React$Portal {
   invariant(
     isValidContainer(container),
     'Target container is not a DOM element.',
   );
   // TODO: pass ReactDOM portal implementation as third argument
+  // $FlowFixMe The Flow type is opaque but there's no way to actually create it.
   return createPortalImpl(children, container, null, key);
 }
 
+<<<<<<< HEAD
+function scheduleHydration(target: Node) {
+  if (target) {
+    queueExplicitHydrationTarget(target);
+  }
+}
+=======
 const ReactDOM: Object = {
   createPortal,
 
@@ -776,173 +724,99 @@ const ReactDOM: Object = {
       isValidContainer(container),
       'unmountComponentAtNode(...): Target container is not a DOM element.',
     );
+>>>>>>> view ReactDom to 633
 
-    if (__DEV__) {
-      warningWithoutStack(
-        !container._reactHasBeenPassedToCreateRootDEV,
-        'You are calling ReactDOM.unmountComponentAtNode() on a container that was previously ' +
-          'passed to ReactDOM.%s(). This is not supported. Did you mean to call root.unmount()?',
-        enableStableConcurrentModeAPIs ? 'createRoot' : 'unstable_createRoot',
+function renderSubtreeIntoContainer(
+  parentComponent: React$Component<any, any>,
+  element: React$Element<any>,
+  containerNode: Container,
+  callback: ?Function,
+) {
+  if (__DEV__) {
+    if (
+      warnUnstableRenderSubtreeIntoContainer &&
+      !didWarnAboutUnstableRenderSubtreeIntoContainer
+    ) {
+      didWarnAboutUnstableRenderSubtreeIntoContainer = true;
+      console.warn(
+        'ReactDOM.unstable_renderSubtreeIntoContainer() is deprecated ' +
+          'and will be removed in a future major release. Consider using ' +
+          'React Portals instead.',
       );
     }
+  }
+  return unstable_renderSubtreeIntoContainer(
+    parentComponent,
+    element,
+    containerNode,
+    callback,
+  );
+}
 
-    if (container._reactRootContainer) {
-      if (__DEV__) {
-        const rootEl = getReactRootElementInContainer(container);
-        const renderedByDifferentReact = rootEl && !getInstanceFromNode(rootEl);
-        warningWithoutStack(
-          !renderedByDifferentReact,
-          "unmountComponentAtNode(): The node you're attempting to unmount " +
-            'was rendered by another copy of React.',
-        );
-      }
-
-      // Unmount should not be batched.
-      unbatchedUpdates(() => {
-        legacyRenderSubtreeIntoContainer(null, null, container, false, () => {
-          container._reactRootContainer = null;
-        });
-      });
-      // If you call unmountComponentAtNode twice in quick succession, you'll
-      // get `true` twice. That's probably fine?
-      return true;
-    } else {
-      if (__DEV__) {
-        const rootEl = getReactRootElementInContainer(container);
-        const hasNonRootReactChild = !!(rootEl && getInstanceFromNode(rootEl));
-
-        // Check if the container itself is a React root node.
-        const isContainerReactRoot =
-          container.nodeType === ELEMENT_NODE &&
-          isValidContainer(container.parentNode) &&
-          !!container.parentNode._reactRootContainer;
-
-        warningWithoutStack(
-          !hasNonRootReactChild,
-          "unmountComponentAtNode(): The node you're attempting to unmount " +
-            'was rendered by React and is not a top-level container. %s',
-          isContainerReactRoot
-            ? 'You may have accidentally passed in a React root node instead ' +
-              'of its container.'
-            : 'Instead, have the parent component update its state and ' +
-              'rerender in order to remove this component.',
-        );
-      }
-
-      return false;
-    }
-  },
-
-  // Temporary alias since we already shipped React 16 RC with it.
-  // TODO: remove in React 17.
-  unstable_createPortal(...args) {
+function unstable_createPortal(
+  children: ReactNodeList,
+  container: Container,
+  key: ?string = null,
+) {
+  if (__DEV__) {
     if (!didWarnAboutUnstableCreatePortal) {
       didWarnAboutUnstableCreatePortal = true;
-      lowPriorityWarningWithoutStack(
-        false,
+      console.warn(
         'The ReactDOM.unstable_createPortal() alias has been deprecated, ' +
           'and will be removed in React 17+. Update your code to use ' +
           'ReactDOM.createPortal() instead. It has the exact same API, ' +
           'but without the "unstable_" prefix.',
       );
     }
-    return createPortal(...args);
-  },
-
-  unstable_batchedUpdates: batchedUpdates,
-
-  // TODO remove this legacy method, unstable_discreteUpdates replaces it
-  unstable_interactiveUpdates: (fn, a, b, c) => {
-    flushDiscreteUpdates();
-    return discreteUpdates(fn, a, b, c);
-  },
-
-  unstable_discreteUpdates: discreteUpdates,
-  unstable_flushDiscreteUpdates: flushDiscreteUpdates,
-
-  flushSync: flushSync,
-
-  unstable_createRoot: createRoot,
-  unstable_createSyncRoot: createSyncRoot,
-  unstable_flushControlled: flushControlled,
-
-  __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
-    // Keep in sync with ReactDOMUnstableNativeDependencies.js
-    // ReactTestUtils.js, and ReactTestUtilsAct.js. This is an array for better minification.
-    Events: [
-      getInstanceFromNode,
-      getNodeFromInstance,
-      getFiberCurrentPropsFromNode,
-      EventPluginHubInjection.injectEventPluginsByName,
-      eventNameDispatchConfigs,
-      accumulateTwoPhaseDispatches,
-      accumulateDirectDispatches,
-      enqueueStateRestore,
-      restoreStateIfNeeded,
-      dispatchEvent,
-      runEventsInBatch,
-      flushPassiveEffects,
-      IsThisRendererActing,
-    ],
-  },
-};
-
-type RootOptions = {
-  hydrate?: boolean,
-  hydrationOptions?: {
-    onHydrated?: (suspenseNode: Comment) => void,
-    onDeleted?: (suspenseNode: Comment) => void,
-  },
-};
-
-function createRoot(
-  container: DOMContainer,
-  options?: RootOptions,
-): _ReactRoot {
-  const functionName = enableStableConcurrentModeAPIs
-    ? 'createRoot'
-    : 'unstable_createRoot';
-  invariant(
-    isValidContainer(container),
-    '%s(...): Target container is not a DOM element.',
-    functionName,
-  );
-  warnIfReactDOMContainerInDEV(container);
-  return new ReactRoot(container, options);
-}
-
-function createSyncRoot(
-  container: DOMContainer,
-  options?: RootOptions,
-): _ReactSyncRoot {
-  const functionName = enableStableConcurrentModeAPIs
-    ? 'createRoot'
-    : 'unstable_createRoot';
-  invariant(
-    isValidContainer(container),
-    '%s(...): Target container is not a DOM element.',
-    functionName,
-  );
-  warnIfReactDOMContainerInDEV(container);
-  return new ReactSyncRoot(container, BatchedRoot, options);
-}
-
-function warnIfReactDOMContainerInDEV(container) {
-  if (__DEV__) {
-    warningWithoutStack(
-      !container._reactRootContainer,
-      'You are calling ReactDOM.%s() on a container that was previously ' +
-        'passed to ReactDOM.render(). This is not supported.',
-      enableStableConcurrentModeAPIs ? 'createRoot' : 'unstable_createRoot',
-    );
-    container._reactHasBeenPassedToCreateRootDEV = true;
   }
+  return createPortal(children, container, key);
 }
 
-if (enableStableConcurrentModeAPIs) {
-  ReactDOM.createRoot = createRoot;
-  ReactDOM.createSyncRoot = createSyncRoot;
-}
+const Internals = {
+  // Keep in sync with ReactDOMUnstableNativeDependencies.js
+  // ReactTestUtils.js, and ReactTestUtilsAct.js. This is an array for better minification.
+  Events: [
+    getInstanceFromNode,
+    getNodeFromInstance,
+    getFiberCurrentPropsFromNode,
+    injectEventPluginsByName,
+    eventNameDispatchConfigs,
+    enqueueStateRestore,
+    restoreStateIfNeeded,
+    dispatchEvent,
+    runEventsInBatch,
+    flushPassiveEffects,
+    IsThisRendererActing,
+  ],
+};
+
+export {
+  createPortal,
+  batchedUpdates as unstable_batchedUpdates,
+  flushSync,
+  Internals as __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED,
+  ReactVersion as version,
+  // Disabled behind disableLegacyReactDOMAPIs
+  findDOMNode,
+  hydrate,
+  render,
+  unmountComponentAtNode,
+  // exposeConcurrentModeAPIs
+  createRoot,
+  createBlockingRoot,
+  discreteUpdates as unstable_discreteUpdates,
+  flushDiscreteUpdates as unstable_flushDiscreteUpdates,
+  flushControlled as unstable_flushControlled,
+  scheduleHydration as unstable_scheduleHydration,
+  // Disabled behind disableUnstableRenderSubtreeIntoContainer
+  renderSubtreeIntoContainer as unstable_renderSubtreeIntoContainer,
+  // Disabled behind disableUnstableCreatePortal
+  // Temporary alias since we already shipped React 16 RC with it.
+  // TODO: remove in React 17.
+  unstable_createPortal,
+  // enableUseEventAPI
+  useEvent as unstable_useEvent,
+};
 
 const foundDevTools = injectIntoDevTools({
   findFiberByHostInstance: getClosestInstanceFromNode,
@@ -962,6 +836,7 @@ if (__DEV__) {
       const protocol = window.location.protocol;
       // Don't warn in exotic cases like chrome-extension://.
       if (/^(https?|file):$/.test(protocol)) {
+        // eslint-disable-next-line react-internal/no-production-logging
         console.info(
           '%cDownload the React DevTools ' +
             'for a better development experience: ' +
@@ -976,5 +851,3 @@ if (__DEV__) {
     }
   }
 }
-
-export default ReactDOM;

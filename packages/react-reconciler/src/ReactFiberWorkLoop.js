@@ -1505,7 +1505,7 @@ function inferTimeFromExpirationTimeWithSuspenseConfig(
 function workLoopSync() {
   // Already timed out, so perform work without checking if we need to yield.
   while (workInProgress !== null) {
-    workInProgress = performUnitOfWork(workInProgress);
+    workInProgress = performUnitOfWork(workInProgress); //! 从fiberRoot.current(HostRoot)开始，
   }
 }
 

@@ -740,13 +740,13 @@ function updateClassComponent(
       workInProgress.effectTag |= Placement;
     }
     // In the initial pass we might need to construct the instance.
-    constructClassInstance(
+    constructClassInstance( //! 调用构造函数
       workInProgress,
       Component,
       nextProps,
       renderExpirationTime,
     );
-    mountClassInstance(
+    mountClassInstance( //! 调用生命周期
       workInProgress,
       Component,
       nextProps,
@@ -2794,7 +2794,7 @@ function remountFiber(
 }
 
 function beginWork(
-  current: Fiber | null,
+  current: Fiber | null, //! current = workInProgress.alternate
   workInProgress: Fiber,
   renderExpirationTime: ExpirationTime,
 ): Fiber | null {
@@ -2826,7 +2826,7 @@ function beginWork(
       oldProps !== newProps ||
       hasLegacyContextChanged() ||
       // Force a re-render if the implementation changed due to hot reload:
-      (__DEV__ ? workInProgress.type !== current.type : false)
+      (__DEV__ ? workInProgress.type !== current.type : false) //!type不一样会重渲染
     ) {
       // If props or context changed, mark the fiber as having performed work.
       // This may be unset if the props are determined to be equal later (memo).

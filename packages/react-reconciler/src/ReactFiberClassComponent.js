@@ -538,7 +538,7 @@ function adoptClassInstance(workInProgress: Fiber, instance: any): void {
 
 function constructClassInstance(
   workInProgress: Fiber,
-  ctor: any,
+  ctor: any, //! App 函数
   props: any,
   renderExpirationTime: ExpirationTime,
 ): any {
@@ -613,7 +613,7 @@ function constructClassInstance(
     }
   }
 
-  const instance = new ctor(props, context);
+  const instance = new ctor(props, context);  // 构造App实例
   const state = (workInProgress.memoizedState =
     instance.state !== null && instance.state !== undefined
       ? instance.state
