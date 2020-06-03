@@ -5,6 +5,99 @@ ReactSyncRoot {
   _internalRoot: FiberRootNode
 }
 ```
+```js
+FiberRootNode {
+  tag,
+  current,
+  containerInfo,
+  pendingChildren,
+  pingCache,
+  finishedExpirationTime,
+  finishedWork,
+  timeoutHandle,
+  context,
+  pendingContext,
+  hydrate,
+  firstBatch,
+  callbackNode,
+  callbackPriority,
+  firstPendingTime,
+  firstSuspendedTime,
+  lastSuspendedTime,
+  nextKnowPendingLevel,
+  lastPingedTime,
+  lastExpireTime,
+  //enableSchedulerTracing === true
+  interactionThreadID,
+  memoizedInteractions,
+  pendingInteractionMap,
+  // enableSuspenseCallback === true
+  hydrationCallbacks
+}
+```
+```js
+FiberNode{
+  tag,
+  key,
+  elementType,
+  type,
+  stateNode,
+  return,
+  child,
+  sibling,
+  index,
+  ref,
+  pendingProps,
+  memoizedProps,
+  updateQueue,
+  memoizedState,
+  dependencies,
+  mode,
+  effectTag,
+  nextEffect,
+  firstEffect,
+  lastEffect,
+  expirationTime,
+  childExpirationTime,
+  alternate,
+  // enableProfilerTimer === true
+  actualDuration,
+  actualStartTime,
+  selfBaseDuration,
+  treeBaseDuration,
+  // enableUserTimingAPI === true
+  _debugID,
+  _debugIsCurrentlyTiming,
+  // __DEV__
+  _debugSource,
+  _debugOwner,
+  _debugNeedRemount,
+  _debugHookTypes,
+}
+```
+```js
+Update{
+  expirationTime,
+  suspenseConfig,
+  tag,
+  payload,
+  callback,
+  next,
+  nextEffect
+  // __DEV__
+  priority
+}
+```
+```js
+task{
+  id,
+  callback,
+  priorityLevel,
+  startTime,
+  expirationTime,
+  sortIndex
+}
+```
 
 ## 调用栈
 ```js
@@ -15,7 +108,6 @@ ReactDom.render()@ReactDOM.js:707
         -> getReactRootElementInContainer()@ReactDOM.js:500  //是否具备合成条件
       -> new ReactSyncRoot()@ReactDOM.js:394
         -> createRootImpl()@ReactDOM.js:373
-
           -> createContainer()@ReactFiberReconciler.js:299
             -> createFiberRoot()@ReactFiberRoot.js:148
               -> new FiberRootNode()@ReactFiberRoot.js:116
@@ -23,12 +115,12 @@ ReactDom.render()@ReactDOM.js:707
                 -> createFiber()@ReactFiber.js:354
                   -> new FiberNode()@ReactFiber.js:255
           -> markContainerAsRoot()@ReactDOM.js:393
-    -> unbatchedUpdates(fn)@ReactFiberWorkLoop.js:1238
-      -> fn()@ReactDOM.js:631
+    -> unbatchedUpdates(fn)@ReactFiberWorkLoop.js:1235
+      -> fn()@ReactDOM.js:616
         -> updateContainer()@ReactFiberReconciler.js:308
           -> requestCurrentTime()@ReactFiberWorkLoop.js:292
           -> requestCurrentSuspenseConfig()@ReactFiberSuspenseConfig.js:20
-          -> computeExpirationForFiber()@ReactFiberReconciler.js:324
+          -> computeExpirationForFiber()@ReactFiberWorkLoop.js:307
           -> updateContainerAtExpirationTime()ReactFiberReconciler.js:181
             -> getContextForSubtree()@ReactFiberReconciler.js:114
               -> getInstance:get()@ReactInstanceMap.js:27
@@ -36,25 +128,25 @@ ReactDom.render()@ReactDOM.js:707
             -> scheduleRootUpdate()@ReactFiberReconciler.js:134
               -> createUpdate()@ReactUpdateQueue.js:204
               -> enqueueUpdate()@ReactUpdateQueue.js:239
-              -> scheduleWork:scheduleUpdateOnFiber()@ReactFiberWorkLoop.js:388
-                -> checkForNestedUpdates()@ReactFiberWorkLoop.js:2550
-                -> warnAboutInvalidUpdatesOnClassComponentsInDEV()@ReactFiberWorkLoop.js:2721
+              -> scheduleWork:scheduleUpdateOnFiber()@ReactFiberWorkLoop.js:385
+                -> checkForNestedUpdates()@ReactFiberWorkLoop.js:2547
+                -> warnAboutInvalidUpdatesOnClassComponentsInDEV()@ReactFiberWorkLoop.js:2718
                 -> markUpdateTimeFormFiberToRoot()@ReactFiberWorkLoop.js:464
-                -> checkForInterruption()@ReactFiberWorkLoop.js:2600
+                -> checkForInterruption()@ReactFiberWorkLoop.js:2597
                 -> recordScheduleUpdate()@ReactDebugFiberPerf.js:226
                 -> getCurrentPriorityLevel()@SchedulerWithReactIntegration.js:86
                   -> Scheduler_getCurrentPriorityLevel:unstable_getCurrentPriorityLevel()@Scheduler.js:394
-                -> ensureRootIsScheduled()@ReactFiberWorkLoop.js:566
-                  -> getNextRootExpirationTimeTOWorkOn()@ReactFiberWorkLoop.js:533
+                -> ensureRootIsScheduled()@ReactFiberWorkLoop.js:563
+                  -> getNextRootExpirationTimeTOWorkOn()@ReactFiberWorkLoop.js:530
                   -> requestCurrentTime()@ReactFiberWorkLoop.js:292
                   -> inferPriorityFromExpirationTime()@ReactFiberExpirationTime.js:118
                   -> scheduleSyncCallback(performSyncWorkOnRoot)@SchedulerWithReactIntegration.js:137
                     -> Scheduler_scheduleCallback:unstable_scheduleCallback(,callback:flushSyncCallbackQueueImpl,)@Scheduler.js:295
                       -> getCurrentTime()@SchedulerHostConfig.js:27/55/111/114
                       -> requestHostCallback(flushWork)@SchedulerHostConfig.js:58/343
-                      -> requestAnimationFrame(onAnimationFrame)
-                -> schedulePendingInteractions()@ReactFiberWorkLoop.js:3046
-                  -> scheduleInteractions()@ReactFiberWorkLoop.js:3012
+                        -> requestAnimationFrame(onAnimationFrame)
+                -> schedulePendingInteractions()@ReactFiberWorkLoop.js:3043
+                  -> scheduleInteractions()@ReactFiberWorkLoop.js:3009
                 -> flushSyncCallbackQueue()@SchedulerWithReactIntegration.js:161
                   -> Scheduler_cancelCallback:unstable_cancelCallback()@Scheduler.js:379
                   -> flushSyncCallbackQueueImpl()@SchedulerWithReactIntegration.js:170
@@ -62,21 +154,21 @@ ReactDom.render()@ReactDOM.js:707
                       -> reactPriorityToSchedulerPriority()@SchedulerWithReactIntegration.js:103
                       -> Scheduler_runWithPriority:unstable_runWithPriority(, fn)@Scheduler.js:217
                         -> eventHandler:fn()@SchedulerWithReactIntegration.js:178
-                          -> @ for
-                            -> do ...while
-                              -> callback:performSyncWorkOnRoot()@ReactFiberWorkLoop.js:997
-                                -> prepareFreshStack()@ReactFiberWorkLoop.js:1288
+                          -> # for @SchedulerWithReactIntegration.js:179
+                            -> # do ...while #SchedulerWithIntegration.js:181
+                              -> callback:performSyncWorkOnRoot()@ReactFiberWorkLoop.js:994
+                                -> prepareFreshStack()@ReactFiberWorkLoop.js:1285
                                   -> createWorkInProgress()@ReactFiber.js:393
                                     -> createFiber()@ReactFiber.js:354
                                 -> startWorkOnPendingInteractions()@ReactFiberWorkLoop.js:3057
                                 -> startWorkLoopTimer()@ReactDebugFiberPerf.js:356
-                                -> do ...while
-                                  -> workLoopSync()@ReactFiberWorkLoop.js:1505
-                                    -> while
-                                      -> performUnitOfWork()@ReactFiberWorkLoop.js:1520
+                                -> #do ...while @ReactFiberWorkLoop.js:1030
+                                  -> workLoopSync()@ReactFiberWorkLoop.js:1502
+                                    -> #while @ReactFiberWorkLoop.js:1504
+                                      -> performUnitOfWork()@ReactFiberWorkLoop.js:1517
                                         -> startWorkTimer()@ReactDebugFiberPerf.js:266
                                         -> beginWork()@ReactFiberBeginWork.js:2796
-                                          -> switch
+                                          -> #switch @ReactFiberBeginWork.js:2839
                                             -> case HostRoot
                                             -> case HostComponent
                                             -> case ClassComponent
@@ -85,39 +177,18 @@ ReactDom.render()@ReactDOM.js:707
                                             -> case Profiler
                                             -> case SuspenseComponent
                                             -> case SuspenseListComponent
-                                          -> switch
+                                          -> #switch @ReactFiberBeginWork.js:3012
                                             -> case IndeterminateComponent
                                             -> case LazyComponent
                                             -> case FunctionComponent
                                             -> case ClassComponent
                                               -> updateClassComponent()@ReactFiberBeginWork.js:693
-                                              -> isLegacyContextProvider()@ReactFiberContext.js:136
-                                              -> prepareToReadContext()@ReactFiberBeginWork.js:310
-                                              -> constructClassInstance()@ReactFiberClassComponent.js:539
-                                                -> adoptClassInstance()@ReactFiberClassComponent.js:529
-                                              -> mountClassInstance()@ReactFiberClassComponent.js:780
-                                                -> if readContext()@ReactFiberNewContext.js:332
-                                                -> if
-                                                  -> getUnmaskedContext()@ReactFiberContext.js:45
-                                                  -> getMaskedContext()@ReactFiberContext.js:78
-                                                    -> cacheContext()@ReactFiberContext.js:64
-                                                -> if processUpdateQueue()@ReactUpdateQueue.js:435
-                                                  -> ensureWorkInProgressQueueIsAClone()@ReactUpdateQueue.js:345
-                                                    -> if cloneUpdateQueue()@ReactUpdateQueue.js:182
-                                                  -> while
-                                                    -> markRenderEventTimeAndConfig()@ReactFiberWorkLoop.js:1407
-                                                    -> getStateFromUpdate()@ReactUpdateQueue.js:360
-                                                      -> switch
-                                                        -> case ReplaceState
-                                                        -> case CaptureUpdate
-                                                        -> case UpdateState
-                                                        -> case ForceUpdate
-                                                -> if applyDerivedStateFromProps(,,getDerivedStateFromProps)@ReactFiberClassComponent.js:143
-                                                  -> getDerivedStateFromProps()@ReactFiberClassComponent.js:143
-                                                -> if callComponentWillMount()@ReactFiberClassComponent.js:717
-                                                  -> startPhaseTimer()@RectDebugFiberPerf.js:326
-                                                    -> clearPendingPhaseMeasurement()@ReactDebugFiberPerf.js:183
-                                                  -> stopPhaseTimer()@ReactDebugFiberPerf.js:340
+                                                -> isLegacyContextProvider()@ReactFiberContext.js:136
+                                                -> prepareToReadContext()@ReactFiberBeginWork.js:310
+                                                -> constructClassInstance()@ReactFiberClassComponent.js:539
+                                                  -> adoptClassInstance()@ReactFiberClassComponent.js:529
+                                                -> mountClassInstance()@ReactFiberClassComponent.js:780
+                                                -> finishClassComponent()@ReactFiberBeginWork.js:796
                                             -> case HostRoot
                                             -> case HostComponent
                                             -> case HostText
@@ -135,6 +206,9 @@ ReactDom.render()@ReactDOM.js:707
                                             -> case SuspenseListComponent
                                             -> case FundamentalComponent
                                             -> case ScopeComponent
+
+
+
                                 -> resetContextDependencies()@ReactFiberNewContext.js:57
                                 -> popDispatcher()@ReactFiberWorkLoop.js:1384
                                 -> resolveLocksOnRoot()@ReactFiberWorkLoop.js:1146

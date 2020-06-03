@@ -73,7 +73,7 @@ let warnOnInvalidCallback;
 let didWarnAboutDirectlyAssigningPropsToState;
 let didWarnAboutContextTypeAndContextTypes;
 let didWarnAboutInvalidateContextType;
-
+/**
 if (__DEV__) {
   didWarnAboutStateAssignmentForComponent = new Set();
   didWarnAboutUninitializedState = new Set();
@@ -139,6 +139,7 @@ if (__DEV__) {
   });
   Object.freeze(fakeInternalInstance);
 }
+*/
 
 export function applyDerivedStateFromProps(
   workInProgress: Fiber,
