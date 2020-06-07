@@ -189,8 +189,26 @@ ReactDom.render()@ReactDOM.js:707
                                                   -> adoptClassInstance()@ReactFiberClassComponent.js:529
                                                 -> mountClassInstance()@ReactFiberClassComponent.js:780
                                                 -> finishClassComponent()@ReactFiberBeginWork.js:796
+                                                  -> instance.render()
+                                                  -> forUnmountCurrentAndReconcile()@ReactFiberBeginWork.js:244
+                                                    -> reconcileChildFibers()@ReactChildFiber.js:1246
+                                                      -> reconcilerSingleElement()@ReactChildFiber.js:1132
+                                                        -> #while @ReactChildFiber.js:1140
+                                                          -> useFiber()@ReactChildFiber.js:320
+                                                            -> createWorkInProgress()@ReactFiber.js:393
+                                                              -> createFiber()@ReactFiber.js:354
+                                                                -> new FiberNode()@ReactFiber.js:255
+                                                        -> createFiberFromElement()@ReactFiber.js:731
+                                                          -> createFiberFromTypeAndProps()@ReactFiber.js:593
+                                                            -> createFiber()@ReactFiber.js:354
+                                                              -> new FiberNode()@ReactFiber.js:255
+                                                      -> placeSingleElement()@ReactChildFiber.js:361
                                             -> case HostRoot
                                             -> case HostComponent
+                                              -> updateHostComponent()@ReactFiberBeginWork.js:980
+                                                -> reconcileChildren()@ReactFiberBeginWork.js:211
+                                                  -> #if mountChildFibers()@ReactChildFiber.js:1246
+                                                  -> #else reconcileChildFibers()@ReactChildFiber.js:1246
                                             -> case HostText
                                             -> case SuspenseComponent
                                             -> case HostPortal
@@ -206,14 +224,11 @@ ReactDom.render()@ReactDOM.js:707
                                             -> case SuspenseListComponent
                                             -> case FundamentalComponent
                                             -> case ScopeComponent
-
-
-
                                 -> resetContextDependencies()@ReactFiberNewContext.js:57
                                 -> popDispatcher()@ReactFiberWorkLoop.js:1384
                                 -> resolveLocksOnRoot()@ReactFiberWorkLoop.js:1146
-                                -> finishSyncRender()@ReactFiberWorkLoop.js:1084
-                                  -> commitRoot()@ReactFiberWorkLoop.js:1757
+                                -> finishSyncRender()@ReactFiberWorkLoop.js:1081
+                                  -> commitRoot()@ReactFiberWorkLoop.js:1754
                                     -> runWithPriority(, fn)@SchedulerWIthReactIntegration.js:120
                                       -> Scheduler_runWithPriority()@Scheduler.js:217
                                         -> eventHandler:fn:commitRootImpl()@ReactFiberWorkLoop.js:1766
@@ -223,7 +238,7 @@ ReactDom.render()@ReactDOM.js:707
                                 -> ensureRootIsScheduled()@ReactFiberWorkLoop.js:566
 
 
-
+=======>>>>>>>第二帧<<<<<<<==========
 <---@ return
 @requestAnimationFrame onAnimationFrame()@SchedulerHostConfig.js:272
   -> setTimeout(performWorkUntilDeadline)

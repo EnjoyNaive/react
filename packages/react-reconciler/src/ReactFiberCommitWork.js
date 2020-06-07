@@ -1362,7 +1362,7 @@ function commitWork(current: Fiber | null, finishedWork: Fiber): void {
           const prevListeners = oldProps.listeners;
           const nextListeners = newProps.listeners;
           if (prevListeners !== nextListeners) {
-            updateEventListeners(nextListeners, finishedWork, null);
+            updateEventListeners(nextListeners, finishedWork, null); //! 原生的节点添加事件
           }
         }
       }
