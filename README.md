@@ -1,5 +1,5 @@
 ## 数据结构
-![alt struct](https://github.com/uploy/react/blob/annotation/16.10.0/images/struct.jpg?raw=true)
+![alt struct](https://github.com/uploy/react/blob/annotation/16.10.0/images/struct.svg?raw=true)
 ```js
 ReactSyncRoot {
   _internalRoot: FiberRootNode
