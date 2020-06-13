@@ -1565,7 +1565,7 @@ function completeUnitOfWork(unitOfWork: Fiber): Fiber | null {
         next = completeWork(current, workInProgress, renderExpirationTime);
       } else {
         startProfilerTimer(workInProgress);
-        next = completeWork(current, workInProgress, renderExpirationTime);
+        next = completeWork(current, workInProgress, renderExpirationTime); //! 创建dom节点
         // Update render duration assuming we didn't error.
         stopProfilerTimerIfRunningAndRecordDelta(workInProgress, false);
       }

@@ -766,7 +766,7 @@ function completeWork(
           // (eg DOM renderer supports auto-focus for certain elements).
           // Make sure such renderers get scheduled for later work.
           if (
-            finalizeInitialChildren(
+            finalizeInitialChildren( //! 设置事件监听的入口
               instance,
               type,
               newProps,
