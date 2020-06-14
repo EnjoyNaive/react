@@ -1,6 +1,5 @@
 ## 数据结构
-![alt struct](https://raw.githubusercontent.com/EnjoyNaive/react/version/16.10.0/images/struct.svg)
-![graph](https://docs.google.com/drawings/d/e/2PACX-1vSkfoozwJjIyuRmTIx9XHU9Ij1LI50RaDjQ_juZUoZZgePm1Qrj_0Dj0oUpNws45I0VrbArZura7Zqm/pub?w=4414&h=5758)
+![React Fiber Graph](https://raw.githubusercontent.com/EnjoyNaive/react/version/16.10.0/images/React Fiber Graph.svg)
 ```js
 ReactSyncRoot {
   _internalRoot: FiberRootNode
