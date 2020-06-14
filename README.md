@@ -1,5 +1,5 @@
 ## 数据结构
-![React Fiber Graph](https://raw.githubusercontent.com/EnjoyNaive/react/version/16.10.0/images/React Fiber Graph.svg)
+![React Fiber Graph](https://raw.githubusercontent.com/EnjoyNaive/react/version/16.10.0/images/React\ Fiber\ Graph.svg)
 ```js
 ReactSyncRoot {
   _internalRoot: FiberRootNode
