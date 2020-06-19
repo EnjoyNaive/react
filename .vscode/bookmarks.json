@@ -1,0 +1,317 @@
+[
+	{
+		"path": "$ROOTPATH$/packages/react-reconciler/src/ReactFiberHooks.js",
+		"bookmarks": [
+			{
+				"line": 363,
+				"column": 16,
+				"label": ""
+			}
+		]
+	},
+	{
+		"path": "$ROOTPATH$/README.md",
+		"bookmarks": [
+			{
+				"line": 190,
+				"column": 66,
+				"label": ""
+			}
+		]
+	},
+	{
+		"path": "$ROOTPATH$/packages/react-reconciler/src/ReactFiberReconciler.js",
+		"bookmarks": [
+			{
+				"line": 174,
+				"column": 5,
+				"label": ""
+			},
+			{
+				"line": 175,
+				"column": 5,
+				"label": ""
+			}
+		]
+	},
+	{
+		"path": "$ROOTPATH$/packages/react-reconciler/src/ReactFiberRoot.js",
+		"bookmarks": [
+			{
+				"line": 115,
+				"column": 15,
+				"label": ""
+			}
+		]
+	},
+	{
+		"path": "$ROOTPATH$/packages/react-dom/src/client/ReactDOMHostConfig.js",
+		"bookmarks": [
+			{
+				"line": 230,
+				"column": 40,
+				"label": ""
+			},
+			{
+				"line": 248,
+				"column": 16,
+				"label": ""
+			},
+			{
+				"line": 255,
+				"column": 14,
+				"label": ""
+			},
+			{
+				"line": 361,
+				"column": 29,
+				"label": ""
+			}
+		]
+	},
+	{
+		"path": "$ROOTPATH$/packages/react-reconciler/src/ReactFiberWorkLoop.js",
+		"bookmarks": [
+			{
+				"line": 1031,
+				"column": 25,
+				"label": ""
+			},
+			{
+				"line": 1068,
+				"column": 15,
+				"label": ""
+			},
+			{
+				"line": 1080,
+				"column": 9,
+				"label": ""
+			},
+			{
+				"line": 1501,
+				"column": 0,
+				"label": ""
+			},
+			{
+				"line": 1516,
+				"column": 0,
+				"label": ""
+			},
+			{
+				"line": 1531,
+				"column": 13,
+				"label": ""
+			},
+			{
+				"line": 1538,
+				"column": 22,
+				"label": ""
+			},
+			{
+				"line": 1545,
+				"column": 19,
+				"label": ""
+			},
+			{
+				"line": 1567,
+				"column": 22,
+				"label": ""
+			},
+			{
+				"line": 1762,
+				"column": 9,
+				"label": ""
+			},
+			{
+				"line": 1899,
+				"column": 24,
+				"label": ""
+			},
+			{
+				"line": 2097,
+				"column": 18,
+				"label": ""
+			},
+			{
+				"line": 2123,
+				"column": 36,
+				"label": ""
+			},
+			{
+				"line": 2140,
+				"column": 40,
+				"label": ""
+			},
+			{
+				"line": 2152,
+				"column": 40,
+				"label": ""
+			},
+			{
+				"line": 2157,
+				"column": 40,
+				"label": ""
+			}
+		]
+	},
+	{
+		"path": "$ROOTPATH$/packages/react-reconciler/src/ReactFiberBeginWork.js",
+		"bookmarks": [
+			{
+				"line": 692,
+				"column": 9,
+				"label": ""
+			},
+			{
+				"line": 853,
+				"column": 31,
+				"label": ""
+			},
+			{
+				"line": 2858,
+				"column": 30,
+				"label": ""
+			},
+			{
+				"line": 3030,
+				"column": 29,
+				"label": ""
+			},
+			{
+				"line": 3045,
+				"column": 26,
+				"label": ""
+			},
+			{
+				"line": 3063,
+				"column": 10,
+				"label": ""
+			}
+		]
+	},
+	{
+		"path": "$ROOTPATH$/packages/react-reconciler/src/ReactFiberClassComponent.js",
+		"bookmarks": [
+			{
+				"line": 182,
+				"column": 31,
+				"label": ""
+			},
+			{
+				"line": 616,
+				"column": 44,
+				"label": ""
+			}
+		]
+	},
+	{
+		"path": "$ROOTPATH$/packages/react-reconciler/src/ReactChildFiber.js",
+		"bookmarks": [
+			{
+				"line": 1272,
+				"column": 31,
+				"label": ""
+			}
+		]
+	},
+	{
+		"path": "$ROOTPATH$/packages/react-reconciler/src/ReactFiberCommitWork.js",
+		"bookmarks": [
+			{
+				"line": 456,
+				"column": 39,
+				"label": ""
+			},
+			{
+				"line": 1085,
+				"column": 33,
+				"label": ""
+			},
+			{
+				"line": 1351,
+				"column": 16,
+				"label": ""
+			},
+			{
+				"line": 1364,
+				"column": 68,
+				"label": ""
+			}
+		]
+	},
+	{
+		"path": "$ROOTPATH$/packages/react-reconciler/src/ReactFiberCompleteWork.js",
+		"bookmarks": [
+			{
+				"line": 631,
+				"column": 9,
+				"label": ""
+			},
+			{
+				"line": 674,
+				"column": 17,
+				"label": ""
+			},
+			{
+				"line": 740,
+				"column": 31,
+				"label": ""
+			},
+			{
+				"line": 751,
+				"column": 21,
+				"label": ""
+			},
+			{
+				"line": 768,
+				"column": 28,
+				"label": ""
+			}
+		]
+	},
+	{
+		"path": "$ROOTPATH$/packages/react-dom/src/client/ReactDOMComponent.js",
+		"bookmarks": [
+			{
+				"line": 307,
+				"column": 9,
+				"label": ""
+			},
+			{
+				"line": 358,
+				"column": 34,
+				"label": ""
+			},
+			{
+				"line": 363,
+				"column": 17,
+				"label": ""
+			},
+			{
+				"line": 510,
+				"column": 16,
+				"label": ""
+			},
+			{
+				"line": 605,
+				"column": 26,
+				"label": ""
+			}
+		]
+	},
+	{
+		"path": "$ROOTPATH$/packages/react-dom/src/events/ReactDOMEventListener.js",
+		"bookmarks": [
+			{
+				"line": 290,
+				"column": 25,
+				"label": ""
+			},
+			{
+				"line": 332,
+				"column": 16,
+				"label": ""
+			}
+		]
+	}
+]
