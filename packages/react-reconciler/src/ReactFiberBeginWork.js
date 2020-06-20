@@ -2795,7 +2795,7 @@ function remountFiber(
 
 function beginWork(
   current: Fiber | null,
-  workInProgress: Fiber,
+  workInProgress: Fiber, //! current = workInProgress.alternate 为什么这么传？？？
   renderExpirationTime: ExpirationTime,
 ): Fiber | null {
   const updateExpirationTime = workInProgress.expirationTime;
@@ -2836,7 +2836,7 @@ function beginWork(
       // This fiber does not have any pending work. Bailout without entering
       // the begin phase. There's still some bookkeeping we that needs to be done
       // in this optimized path, mostly pushing stuff onto the stack.
-      switch (workInProgress.tag) {
+      switch (workInProgress.tag) { //! 从 HostRoot 开始
         case HostRoot:
           pushHostRootContext(workInProgress);
           resetHydrationState();

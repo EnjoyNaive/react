@@ -1014,7 +1014,7 @@ function performSyncWorkOnRoot(root) { //! fiberRoot
     if (
       root !== workInProgressRoot ||
       expirationTime !== renderExpirationTime
-    ) {
+    ) { //! init true
       prepareFreshStack(root, expirationTime);
       startWorkOnPendingInteractions(root, expirationTime);
     }
@@ -1500,7 +1500,7 @@ function inferTimeFromExpirationTimeWithSuspenseConfig(
 
 // The work loop is an extremely hot path. Tell Closure not to inline it.
 /** @noinline */
-function workLoopSync() {
+function workLoopSync() { //! HostRoot 开始
   // Already timed out, so perform work without checking if we need to yield.
   while (workInProgress !== null) {
     workInProgress = performUnitOfWork(workInProgress);
