@@ -290,7 +290,8 @@ let spawnedWorkDuringRender: null | Array<ExpirationTime> = null;
 let currentEventTime: ExpirationTime = NoWork;
 
 export function requestCurrentTime() {
-  if ((executionContext & (RenderContext | CommitContext)) !== NoContext) {
+  //!      0b001000      & (  0b010000    |  0b100000    ) = 0b000000  !== 0b000000
+  if ((executionContext & (RenderContext | CommitContext)) !== NoContext) { //! init Render { false }
     // We're inside React, so it's fine to read the actual time.
     return msToExpirationTime(now());
   }
@@ -300,14 +301,14 @@ export function requestCurrentTime() {
     return currentEventTime;
   }
   // This is the first update since React yielded. Compute a new start time.
-  currentEventTime = msToExpirationTime(now());
+  currentEventTime = msToExpirationTime(now()); //! init Render here 1073565500
   return currentEventTime;
 }
 
 export function computeExpirationForFiber(
-  currentTime: ExpirationTime,
-  fiber: Fiber,
-  suspenseConfig: null | SuspenseConfig,
+  currentTime: ExpirationTime, //! 1073565500
+  fiber: Fiber, //! HostRoot  {mode = 0}
+  suspenseConfig: null | SuspenseConfig, //! null
 ): ExpirationTime {
   const mode = fiber.mode;
   if ((mode & BatchedMode) === NoMode) {
@@ -383,7 +384,7 @@ export function computeUniqueAsyncExpiration(): ExpirationTime {
 }
 
 export function scheduleUpdateOnFiber(
-  fiber: Fiber,
+  fiber: Fiber, //! HostRoot
   expirationTime: ExpirationTime,
 ) {
   checkForNestedUpdates();
@@ -471,7 +472,7 @@ function markUpdateTimeFromFiberToRoot(fiber, expirationTime) {
   let node = fiber.return;
   let root = null;
   if (node === null && fiber.tag === HostRoot) {
-    root = fiber.stateNode;
+    root = fiber.stateNode; //! HostRoot.stateNode = fiberRoot
   } else {
     while (node !== null) {
       alternate = node.alternate;
@@ -524,7 +525,7 @@ function markUpdateTimeFromFiberToRoot(fiber, expirationTime) {
     markRootUpdatedAtTime(root, expirationTime);
   }
 
-  return root;
+  return root; //! ReactRoot
 }
 
 function getNextRootExpirationTimeToWorkOn(root: FiberRoot): ExpirationTime {
@@ -991,7 +992,7 @@ function finishConcurrentRender(
 
 // This is the entry point for synchronous tasks that don't go
 // through Scheduler
-function performSyncWorkOnRoot(root) {
+function performSyncWorkOnRoot(root) { //! fiberRoot
   // Check if there's expired work on this root. Otherwise, render at Sync.
   const lastExpiredTime = root.lastExpiredTime;
   const expirationTime = lastExpiredTime !== NoWork ? lastExpiredTime : Sync;
@@ -1234,8 +1235,8 @@ export function discreteUpdates<A, B, C, R>(
 
 export function unbatchedUpdates<A, R>(fn: (a: A) => R, a: A): R {
   const prevExecutionContext = executionContext;
-  executionContext &= ~BatchedContext;
-  executionContext |= LegacyUnbatchedContext;
+  executionContext &= ~BatchedContext; //! 0b111110 & 0b000000
+  executionContext |= LegacyUnbatchedContext; //! 0b000000 | 0b001000 = 0b001000
   try {
     return fn(a);
   } finally {

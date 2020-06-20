@@ -202,8 +202,8 @@ function cloneUpdateQueue<State>(
 }
 
 export function createUpdate(
-  expirationTime: ExpirationTime,
-  suspenseConfig: null | SuspenseConfig,
+  expirationTime: ExpirationTime, //sync
+  suspenseConfig: null | SuspenseConfig, // null
 ): Update<*> {
   let update: Update<*> = {
     expirationTime,
@@ -246,7 +246,7 @@ export function enqueueUpdate<State>(fiber: Fiber, update: Update<State>) {
     queue1 = fiber.updateQueue;
     queue2 = null;
     if (queue1 === null) {
-      queue1 = fiber.updateQueue = createUpdateQueue(fiber.memoizedState);
+      queue1 = fiber.updateQueue = createUpdateQueue(fiber.memoizedState); //! fiber无更新时并且备胎不存在， 给fiber创建新的updateQueue
     }
   } else {
     // There are two owners.
@@ -255,24 +255,25 @@ export function enqueueUpdate<State>(fiber: Fiber, update: Update<State>) {
     if (queue1 === null) {
       if (queue2 === null) {
         // Neither fiber has an update queue. Create new ones.
-        queue1 = fiber.updateQueue = createUpdateQueue(fiber.memoizedState);
+        queue1 = fiber.updateQueue = createUpdateQueue(fiber.memoizedState); //! fiber 和备胎都没有UpdateQueue 那么创建各自的updateQueue
         queue2 = alternate.updateQueue = createUpdateQueue(
           alternate.memoizedState,
         );
       } else {
         // Only one fiber has an update queue. Clone to create a new one.
-        queue1 = fiber.updateQueue = cloneUpdateQueue(queue2);
+        queue1 = fiber.updateQueue = cloneUpdateQueue(queue2); //! fiber没有updateQueue, 备胎有， 把备胎的UpdateQueue拷过来
       }
     } else {
       if (queue2 === null) {
         // Only one fiber has an update queue. Clone to create a new one.
-        queue2 = alternate.updateQueue = cloneUpdateQueue(queue1);
+        queue2 = alternate.updateQueue = cloneUpdateQueue(queue1); //! 备胎没有updateQueue, fiber有， 把fiber的UpdateQueue拷过来
       } else {
         // Both owners have an update queue.
+        //! fiber 和 备胎都有UpdateQueue, 什么都不用干
       }
     }
   }
-  if (queue2 === null || queue1 === queue2) {
+  if (queue2 === null || queue1 === queue2) { //! 似乎并不会出现 queue1 === queue2的 case，只会出现 queue2===null 的 case
     // There's only a single queue.
     appendUpdateToQueue(queue1, update);
   } else {

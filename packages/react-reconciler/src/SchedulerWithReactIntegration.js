@@ -71,7 +71,7 @@ export const requestPaint =
 let syncQueue: Array<SchedulerCallback> | null = null;
 let immediateQueueCallbackNode: mixed | null = null;
 let isFlushingSyncQueue: boolean = false;
-let initialTimeMs: number = Scheduler_now();
+let initialTimeMs: number = Scheduler_now(); //! Scheduler_now 得到的时间是页面的生存时间(单位是ms), 兼容 `performance.now`
 
 // If the initial timestamp is reasonably small, use Scheduler's `now` directly.
 // This will be the case for modern browsers that support `performance.now`. In
@@ -80,7 +80,7 @@ let initialTimeMs: number = Scheduler_now();
 // the behavior of performance.now and keep our times small enough to fit
 // within 32 bits.
 // TODO: Consider lifting this into Scheduler.
-export const now =
+export const now = //! ms
   initialTimeMs < 10000 ? Scheduler_now : () => Scheduler_now() - initialTimeMs;
 
 export function getCurrentPriorityLevel(): ReactPriorityLevel {

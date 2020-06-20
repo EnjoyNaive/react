@@ -577,7 +577,7 @@ export function createHostRootFiber(tag: RootTag): Fiber {
   } else if (tag === BatchedRoot) {
     mode = BatchedMode | StrictMode;
   } else {
-    mode = NoMode;
+    mode = NoMode; //! HostRoot
   }
 
   if (enableProfilerTimer && isDevToolsPresent) {

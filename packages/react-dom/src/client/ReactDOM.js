@@ -393,7 +393,7 @@ function createRootImpl(
 
 function ReactSyncRoot(
   container: DOMContainer,
-  tag: RootTag,
+  tag: RootTag, //! init 0
   options: void | RootOptions,
 ) {
   this._internalRoot = createRootImpl(container, tag, options);
@@ -586,7 +586,7 @@ function legacyRenderSubtreeIntoContainer( //! render 函数直接调用的函�
   if (!root) {
     // Initial mount
     /**
-     *! 可以预见挂载点元素的dom对象 (#root) 总包含一个 `_reactRootContainer` 属性
+     *! 挂载点元素的dom对象 (#root) 包含一个 `_reactRootContainer` 属性
      *! 它的值是 `ReactRoot` 类型是 ReactSyncRoot{ _internalRoot: FiberRoot{ current: HostRoot } }
      *! HostRoot 是 <App /> 的父节点
      *! [ #root ]-._reactRootContainer-->[  ReactRoot ] -._internalRoot-->[ FiberRoot ]-.current-->[ HostRoot ]
@@ -595,6 +595,7 @@ function legacyRenderSubtreeIntoContainer( //! render 函数直接调用的函�
      *!    | +-----------------------------------------.containerInfo-------+                              | |
      *!    +----['__reactContainer$' + randomKey]----------------------------------------------------------+ |
      *!                                                                         [ <App /> ]<------.child-----+
+     *!  更详细的结构图 https://docs.google.com/drawings/d/1hklTxBbeUxJbeaekDX59TQfserPsA7IUHKQEcee0vj8/edit?usp=sharing
      */
     root = container._reactRootContainer = legacyCreateRootFromDOMContainer(
       container,
@@ -612,7 +613,7 @@ function legacyRenderSubtreeIntoContainer( //! render 函数直接调用的函�
     }
     // Initial mount should not be batched.
     //! unbatchedUpdates file://.../react-reconciler/src/ReactFiberWorkLoop:1235
-    //! 可以认为直接调用了回调
+    //! 可以认为直接调用了回调, 设定调度模式为非批量更新8
     unbatchedUpdates(() => {
       //! updateContainer file://.../react-reconciler/src/ReactFiberReconciler:308
       updateContainer(children, fiberRoot, parentComponent, callback);

@@ -119,9 +119,11 @@ function getContextForSubtree(
   }
 
   const fiber = getInstance(parentComponent);
-  const parentContext = findCurrentUnmaskedContext(fiber);
+  const parentContext = findCurrentUnmaskedContext(fiber); //! 递归父节点， 查找context
 
   if (fiber.tag === ClassComponent) {
+    //! 兼容 getChildContext 形式的context定义
+    //! 旧版的context 使用 getChildContext 和 childContextTypes 在 Class 类型的组件上定义context
     const Component = fiber.type;
     if (isLegacyContextProvider(Component)) {
       return processChildContext(fiber, Component, parentContext);
@@ -132,10 +134,10 @@ function getContextForSubtree(
 }
 
 function scheduleRootUpdate(
-  current: Fiber,
-  element: ReactNodeList,
-  expirationTime: ExpirationTime,
-  suspenseConfig: null | SuspenseConfig,
+  current: Fiber, //! HostRoot
+  element: ReactNodeList, //! <App />
+  expirationTime: ExpirationTime, //! sync
+  suspenseConfig: null | SuspenseConfig, //! null
   callback: ?Function,
 ) {
   if (__DEV__) {
@@ -172,7 +174,7 @@ function scheduleRootUpdate(
     update.callback = callback;
   }
 
-  enqueueUpdate(current, update);
+  enqueueUpdate(current, update); //! 将 update 添加到 updateQueue
   scheduleWork(current, expirationTime);
 
   return expirationTime;
@@ -181,7 +183,7 @@ function scheduleRootUpdate(
 export function updateContainerAtExpirationTime(
   element: ReactNodeList,
   container: OpaqueRoot,
-  parentComponent: ?React$Component<any, any>,
+  parentComponent: ?React$Component<any, any>, //! init null
   expirationTime: ExpirationTime,
   suspenseConfig: null | SuspenseConfig,
   callback: ?Function,
@@ -201,7 +203,7 @@ export function updateContainerAtExpirationTime(
     }
   }
 
-  const context = getContextForSubtree(parentComponent);
+  const context = getContextForSubtree(parentComponent); //! init { } 获取 parentComponent 及其 return 链上最近的 context
   if (container.context === null) {
     container.context = context;
   } else {
@@ -306,13 +308,13 @@ export function createContainer(
 }
 
 export function updateContainer(
-  element: ReactNodeList,
-  container: OpaqueRoot,
-  parentComponent: ?React$Component<any, any>,
+  element: ReactNodeList, //! <App />
+  container: OpaqueRoot, //! fiberRoot
+  parentComponent: ?React$Component<any, any>, //! 父组件，domRender 时为null
   callback: ?Function,
 ): ExpirationTime {
-  const current = container.current;
-  const currentTime = requestCurrentTime();
+  const current = container.current; //! HostRoot
+  const currentTime = requestCurrentTime();//! mock 1073565500
   if (__DEV__) {
     // $FlowExpectedError - jest isn't a global, and isn't recognized outside of tests
     if ('undefined' !== typeof jest) {
@@ -320,8 +322,8 @@ export function updateContainer(
       warnIfNotScopedWithMatchingAct(current);
     }
   }
-  const suspenseConfig = requestCurrentSuspenseConfig();
-  const expirationTime = computeExpirationForFiber(
+  const suspenseConfig = requestCurrentSuspenseConfig(); //! null
+  const expirationTime = computeExpirationForFiber( //! Sync  最大的32位整数
     currentTime,
     current,
     suspenseConfig,

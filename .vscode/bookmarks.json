@@ -23,12 +23,12 @@
 		"path": "$ROOTPATH$/packages/react-reconciler/src/ReactFiberReconciler.js",
 		"bookmarks": [
 			{
-				"line": 174,
+				"line": 176,
 				"column": 5,
 				"label": ""
 			},
 			{
-				"line": 175,
+				"line": 177,
 				"column": 5,
 				"label": ""
 			}
@@ -73,82 +73,97 @@
 		"path": "$ROOTPATH$/packages/react-reconciler/src/ReactFiberWorkLoop.js",
 		"bookmarks": [
 			{
-				"line": 1031,
+				"line": 418,
+				"column": 21,
+				"label": ""
+			},
+			{
+				"line": 994,
+				"column": 9,
+				"label": ""
+			},
+			{
+				"line": 1032,
 				"column": 25,
 				"label": ""
 			},
 			{
-				"line": 1068,
+				"line": 1069,
 				"column": 15,
 				"label": ""
 			},
 			{
-				"line": 1080,
+				"line": 1081,
 				"column": 9,
 				"label": ""
 			},
 			{
-				"line": 1501,
+				"line": 1306,
+				"column": 30,
+				"label": ""
+			},
+			{
+				"line": 1502,
 				"column": 0,
 				"label": ""
 			},
 			{
-				"line": 1516,
+				"line": 1517,
 				"column": 0,
 				"label": ""
 			},
 			{
-				"line": 1531,
+				"line": 1532,
 				"column": 13,
 				"label": ""
 			},
 			{
-				"line": 1538,
+				"line": 1539,
 				"column": 22,
 				"label": ""
 			},
 			{
-				"line": 1545,
+				"line": 1546,
 				"column": 19,
 				"label": ""
 			},
 			{
-				"line": 1567,
+				"line": 1568,
 				"column": 22,
 				"label": ""
 			},
 			{
-				"line": 1762,
+				"line": 1763,
 				"column": 9,
 				"label": ""
 			},
 			{
-				"line": 1899,
+				"line": 1900,
 				"column": 24,
 				"label": ""
 			},
 			{
-				"line": 2097,
+				"line": 2098,
 				"column": 18,
 				"label": ""
 			},
 			{
-				"line": 2123,
+				"line": 2124,
 				"column": 36,
 				"label": ""
 			},
 			{
-				"line": 2140,
+				"line": 2141,
 				"column": 40,
 				"label": ""
 			},
 			{
-				"line": 2152,
+				"line": 2153,
 				"column": 40,
 				"label": ""
 			},
 			{
-				"line": 2157,
+				"line": 2158,
 				"column": 40,
 				"label": ""
 			}

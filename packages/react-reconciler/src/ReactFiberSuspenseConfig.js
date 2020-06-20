@@ -18,5 +18,5 @@ export type SuspenseConfig = {|
 |};
 
 export function requestCurrentSuspenseConfig(): null | SuspenseConfig {
-  return ReactCurrentBatchConfig.suspense;
+  return ReactCurrentBatchConfig.suspense; //! null
 }
