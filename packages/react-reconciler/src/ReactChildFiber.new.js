@@ -1292,6 +1292,15 @@ function ChildReconciler(shouldTrackSideEffects) {
       newChild = newChild.props.children;
     }
 
+    if (isArray(newChild)) {
+      return reconcileChildrenArray(
+        returnFiber,
+        currentFirstChild,
+        newChild,
+        lanes,
+      );
+    }
+    
     // Handle object types
     const isObject = typeof newChild === 'object' && newChild !== null;
 
@@ -1341,14 +1350,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       );
     }
 
-    if (isArray(newChild)) {
-      return reconcileChildrenArray(
-        returnFiber,
-        currentFirstChild,
-        newChild,
-        lanes,
-      );
-    }
+
 
     if (getIteratorFn(newChild)) {
       return reconcileChildrenIterator(
