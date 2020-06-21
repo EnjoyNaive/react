@@ -391,7 +391,7 @@ export function resolveLazyComponentTag(Component: Function): WorkTag {
 
 // This is used to create an alternate fiber to do work on.
 export function createWorkInProgress(
-  current: Fiber, //! HostRoot
+  current: Fiber, //! init HostRoot
   pendingProps: any,
   expirationTime: ExpirationTime,
 ): Fiber {

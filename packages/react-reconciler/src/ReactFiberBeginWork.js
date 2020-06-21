@@ -2836,7 +2836,7 @@ function beginWork(
       // This fiber does not have any pending work. Bailout without entering
       // the begin phase. There's still some bookkeeping we that needs to be done
       // in this optimized path, mostly pushing stuff onto the stack.
-      switch (workInProgress.tag) { //! 从 HostRoot 开始
+      switch (workInProgress.tag) { //! 从 HostRoot 开始, 处理不同类型的 context
         case HostRoot:
           pushHostRootContext(workInProgress);
           resetHydrationState();
@@ -3009,7 +3009,7 @@ function beginWork(
   // Before entering the begin phase, clear the expiration time.
   workInProgress.expirationTime = NoWork;
 
-  switch (workInProgress.tag) {
+  switch (workInProgress.tag) { //! 挂载不同类型的组件
     case IndeterminateComponent: {
       return mountIndeterminateComponent(
         current,
